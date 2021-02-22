@@ -658,7 +658,8 @@ $(document).ready(function(){
             success: function(data){
                 if(data!="Error")
                 {
-                    window.location.href="/{{session()->get('client-slug')}}/manager/order-info/"+data;
+                    var tableId= "{{request()->id}}";
+                    window.location.href="/{{session()->get('client-slug')}}/manager/order-info/"+tableId;
                 }
                 else
                 {

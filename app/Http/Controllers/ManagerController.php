@@ -14,6 +14,7 @@ use App\Models\Waiter;
 use App\Models\TableInfo;
 use App\Models\Member;
 use App\Models\Order;
+use App\Models\Kot;
 use Session;
 
 class ManagerController extends Controller
@@ -157,16 +158,32 @@ class ManagerController extends Controller
         if($slug != $clientSlug){
             return view("error");
         }
-        $order=Order::where('order_no',$orderid)->get();
-        if($order->count()>0)
-        {
+        $kots = Kot::select('order_no')->distinct()->where('table_id',$orderid)->get();
+       
+        $data;
+        $i=0;
+        foreach($kots as $row){
+            $data[$i] = Kot::where('order_no',$row->order_no)->get();
+            $i++;
+        }
+        return view('manager.orderInfo',['orders'=>$data]);
+        // foreach($data as $order){
+        //     foreach($order as $row){
+        //         echo "$row->product_name<br>";
+        //     }
+        // }
+
+        //  old one
+        // $order=Order::where('order_no',$orderid)->get();
+        // if($order->count()>0)
+        // {
             
-            return view('manager.orderInfo',['orders'=>$order]);
-        }
-        else
-        {
-            return view('manager.orderInfo',['result'=>"No data found"]);
-        }
+        //     return view('manager.orderInfo',['orders'=>$order]);
+        // }
+        // else
+        // {
+        //     return view('manager.orderInfo',['result'=>"No data found"]);
+        // }
     }
     public function billing($slug, $orderid){
         $clientSlug = Session::get('client-slug');
@@ -322,27 +339,71 @@ class ManagerController extends Controller
 
     public function getOrderTicket(Request $req)
     {
-        $ticket=rand(0000,9999);
-        $get=Order::where('table_id',$req->input('table_id'))->get();
-        if($get->count()>0)
-        {
-            if(empty($get[0]->order_no))
-            {
-                $update=Order::where('table_id',$req->input('table_id'))->update(['order_no'=>$ticket]);
-                if($update)
-                {
-                    $table=TableInfo::where('id',$req->input('table_id'))->update(['table_status'=>2,'order_no'=>$ticket]);
-                    return $ticket;
+         $ticket=rand(0000,9999);
+        // $get = Order::where('table_id',$req->input('table_id'))->get();
+        // $create_kot = new Kot();
+        
+        // $create_kot->table_id = $req->input('table_id');
+        // $create_kot->order_no = $ticket;
+        // $save_kot = $create_kot->save();
+        // if($save_kot){
+        //     return $ticket;
+        // }
+        // else{
+        //     return "Error";
+        // }
+        $get=Order::where(['table_id'=>$req->input('table_id'),'order_no'=>NULL])->get();
+        if($get->count()>0){
+            $update = Order::where(['table_id'=>$req->input('table_id'),'order_no'=>NULL])->update(['order_no'=>$ticket]);
+            if($update){
+               // echo"kldsjf";
+                $orders=Order::where(['table_id'=>$req->input('table_id'),'order_no'=>$ticket])->get();
+                foreach($orders as $row){
+                    //echo "$row->order_no <br>";
+                     $create_kot = new Kot();
+                     $create_kot->client_id =  $row->client_id;
+                     $create_kot->product_name = $row->product_name;
+                     $create_kot->product_price = $row->product_price;
+                     $create_kot->product_qty =  $row->product_qty;
+                     $create_kot->product_type = $row->product_type;
+                     $create_kot->table_no = $row->table_no;
+                    $create_kot->table_id = $row->table_id;
+                    $create_kot->order_no = $row->order_no;
+                    $create_kot->total_price = $row->total_price;
+                    $create_kot->date_time = $row->date_time;
+                    $create_kot->waiter_id = $row->waiter_id;
+                    $create_kot->member_id = $row->member_id;
+                    $create_kot->save();
                 }
-                else
-                {
-                    return "Error";
-                }
+                
+                return $orders[0]->client_id;
             }
-            else
-            {
-                return $get[0]->order_no;
+            else{
+                return "Error";
             }
         }
+        // ******************
+        //$ticket=rand(0000,9999);
+        //$get=Order::where('table_id',$req->input('table_id'))->get();
+        // if($get->count()>0)
+        // {
+        //     if(empty($get[0]->order_no))
+        //     {
+        //         $update=Order::where('table_id',$req->input('table_id'))->update(['order_no'=>$ticket]);
+        //         if($update)
+        //         {
+        //             $table=TableInfo::where('id',$req->input('table_id'))->update(['table_status'=>2,'order_no'=>$ticket]);
+        //             return $ticket;
+        //         }
+        //         else
+        //         {
+        //             return "Error";
+        //         }
+        //     }
+        //     else
+        //     {
+        //         return $get[0]->order_no;
+        //     }
+        // }
     }
 }

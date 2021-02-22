@@ -30,8 +30,99 @@
 
     <!-- Page Content -->
     <div class="content">
-        <div class="content-full">
-            <div class="row">
+        <div class="content-full" style="margin-right:-400px">
+        @foreach($orders as $order)
+                <div class="col-sm-3 " style="float:left;margin:10px;">
+                    <div class="row bg-white" style="height: 439px;overflow-y: scroll;overflow-x: hidden;">
+                       @if(isset($order)) 
+                        <div class="col-sm-12 red-bg p-2">
+                            Order no. #{{$order[0]->order_no}}
+                        </div>
+                        <div class="col-sm-12 p-2">
+                            <h6>Dishes <hr></h6>
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <strong>Name</strong>
+                                </div>
+                                <div class="col-sm-4">
+                                    <strong>Quantity</strong>
+                                </div>
+                                <div class="col-sm-4">
+                                    <strong>Price</strong>
+                                </div>
+                                <hr>
+                                @foreach($order as $dishes)
+                                    @if($dishes->product_type=="Dishes")
+                                        <div class="col-sm-4">
+                                            {{$dishes->product_name}}
+                                        </div>
+                                        <div class="col-sm-4">
+                                            {{$dishes->product_qty}}
+                                        </div>
+                                        <div class="col-sm-4 price">
+                                            {{$dishes->total_price}}
+                                        </div>
+                                        <hr>
+                                    @endif
+                                @endforeach
+                            </div>
+                        </div>
+                        <div class="col-sm-12 p-2">
+                            <h6><hr>Drinks <hr></h6>
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <strong>Name</strong>
+                                </div>
+                                <div class="col-sm-4">
+                                    <strong>Quantity</strong>
+                                </div>
+                                <div class="col-sm-4">
+                                    <strong>Price</strong>
+                                </div>
+                                <hr>
+                                @foreach($order as $drinks)
+                                    @if($drinks->product_type=="Drinks")
+                                        <div class="col-sm-4">
+                                            {{$drinks->product_name}}
+                                        </div>
+                                        <div class="col-sm-4">
+                                            {{$drinks->product_qty}}
+                                        </div>
+                                        <div class="col-sm-4 price">
+                                            {{$drinks->total_price}}
+                                        </div>
+                                        <hr>
+                                    @endif
+                                @endforeach
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="col-sm-8">
+                            
+                        </div>
+                        <div class="col-sm-4 p-2">
+                            <hr>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <strong>Total: </strong>
+                                    <span class="total"></span>
+                                </div>
+                                <div class="col-sm-6 text-right">
+                                    <a href="/{{session()->get('client-slug')}}/manager/billing/{{request()->orderid}}" class="btn btn-primary">Final Bill</a>
+                                </div>
+                            </div>
+                        </div>
+                        @elseif(isset($result))
+                        <div class="col-sm-12 red-bg p-2">
+                            {{$result}}
+                        </div>
+                        @endif
+                    </div>
+                </div>
+           
+        @endforeach
+        {{--
+            <div class="row"> 
                 <div class="col-sm-8 mx-auto content-full">
                     <div class="row bg-white">
                        @if(isset($orders)) 
@@ -120,6 +211,7 @@
                     </div>
                 </div>
             </div>
+        --}}   
         </div>
     </div>
     <!-- END Page Content -->
