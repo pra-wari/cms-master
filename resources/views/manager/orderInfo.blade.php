@@ -22,6 +22,9 @@
                     </div>
                     
                 </div>
+                <div class="col-sm-6 text-right">
+                    <a href="/{{session()->get('client-slug')}}/manager/billing/{{request()->orderid}}" class="btn btn-primary">Final Bill</a>
+                </div>
 
             </div>
        </div>
@@ -32,7 +35,7 @@
     <div class="content">
         <div class="content-full" style="margin-right:-400px">
         @foreach($orders as $order)
-                <div class="col-sm-3 " style="float:left;margin:10px;">
+                <div class="col-sm-3 kot" id = "kot_{{$order[0]->order_no}}" style="float:left;margin:10px;">
                     <div class="row bg-white" style="height: 439px;overflow-y: scroll;overflow-x: hidden;">
                        @if(isset($order)) 
                         <div class="col-sm-12 red-bg p-2">
@@ -97,20 +100,19 @@
                             </div>
                         </div>
                         <hr>
-                        <div class="col-sm-8">
-                            
+                        <div class="col-sm-8 text-center">
+                            <br>
+                            <button class="btn btn-success print" value="{{$order[0]->order_no}}">SAVE & PRINT</button>
                         </div>
                         <div class="col-sm-4 p-2">
                             <hr>
                             <div class="row">
-                                <div class="col-sm-6">
+                                <div class="col-sm-12">
                                     <strong>Total: </strong>
-                                    <span class="total"></span>
-                                </div>
-                                <div class="col-sm-6 text-right">
-                                    <a href="/{{session()->get('client-slug')}}/manager/billing/{{request()->orderid}}" class="btn btn-primary">Final Bill</a>
+                                    <span>{{$order[0]->total}}</span>
                                 </div>
                             </div>
+                            
                         </div>
                         @elseif(isset($result))
                         <div class="col-sm-12 red-bg p-2">
@@ -217,17 +219,41 @@
     <!-- END Page Content -->
     <script type="text/javascript">
         $(document).ready(function(){
-            var total=0;
-            $(".price").each(function(){
-                var price=$(this).text();
-                price=price.replace(/[_\W]+/g, "");
-                var total_price=parseInt(price);
-                total+=total_price;
-            });
-            $(".total").text("₹ "+total);
+            // function calc(x){
+            //    $(this).each(function(){
+            //     alert("skldfj");
+            //    });
+            // }
+            // var total=0;
+            // $(".price").each(function(){
+            //     var price=$(this).text();
+            //     price=price.replace(/[_\W]+/g, "");
+            //     var total_price=parseInt(price);
+            //     total+=total_price;
+            // });
+            // $(".total").text("₹ "+total);
 
             $("#search").click(function(){
                 window.location.href="/{{session()->get('client-slug')}}/manager/order-info/"+$(".search").val();
+            });
+
+            $(".print").click(function(){
+                var x = $(this).val();
+
+                $(this).hide();
+                $(".bg-body-light").hide();
+                $(".exit").hide();
+                $(".header").hide();
+                $(".kot").hide();
+                $("#kot_"+x).show();
+                
+                window.print();
+                $(this).show();
+                $(".exit").show();
+                $(".header").show();
+                $(".kot").show();
+                $(".bg-body-light").show();
+
             });
         });
     </script>

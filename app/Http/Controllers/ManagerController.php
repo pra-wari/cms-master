@@ -159,14 +159,25 @@ class ManagerController extends Controller
             return view("error");
         }
         $kots = Kot::select('order_no')->distinct()->where('table_id',$orderid)->get();
-       
-        $data;
-        $i=0;
-        foreach($kots as $row){
-            $data[$i] = Kot::where('order_no',$row->order_no)->get();
-            $i++;
+       if($kots->count()>0){
+            $data;
+            $i=0;
+            foreach($kots as $row){
+                $items = Kot::where('order_no',$row->order_no)->get();
+                $total = 0;
+                foreach($items as $item){
+                    $amt = preg_replace('/[^0-9-.]+/', '', $item->total_price);
+                    $total += (int)$amt;
+                }
+                $items[0]->total = $total;
+                $data[$i] = $items;
+                $i++;
+            }
+            return view('manager.orderInfo',['orders'=>$data]);
+       }
+        else{
+            return view('manager.orderInfo',['result'=>"No data found"]);
         }
-        return view('manager.orderInfo',['orders'=>$data]);
         // foreach($data as $order){
         //     foreach($order as $row){
         //         echo "$row->product_name<br>";
@@ -185,22 +196,61 @@ class ManagerController extends Controller
         //     return view('manager.orderInfo',['result'=>"No data found"]);
         // }
     }
-    public function billing($slug, $orderid){
+    public function billing($slug, $tableid){
         $clientSlug = Session::get('client-slug');
         if($slug != $clientSlug){
             return view("error");
         }
-        $order=Order::where('order_no',$orderid)->get();
-        if($order->count()>0)
-        {
-            $waiter=Waiter::where('id',$order[0]->waiter_id)->get();
-            $member=Member::where('id',$order[0]->member_id)->get();
-            return view('manager.billing',['orders'=>$order,'waiter'=>$waiter,'member'=>$member,'count'=>1]);
+
+        $kot = Kot::select('product_name')->distinct()->where('table_id',$tableid)->get();
+        if($kot->count()>0){
+            $data;
+            $i = 0;
+           
+            foreach($kot as $row){
+                $product =  Kot::where('product_name',$row->product_name)->first();
+
+                $product->product_qty = Kot::where(['product_name'=>"$row->product_name",'table_id'=>$tableid])->sum('product_qty');
+
+                $prices = Kot::where(['product_name'=>"$row->product_name",'table_id'=>$tableid])->get();
+                $amt = 0;
+                foreach($prices as $price){
+                    $number = preg_replace('/[^0-9-.]+/', '', $price->total_price);
+                    $amt += (int)$number;
+                }
+                $amt = strval($amt);
+               
+                $product->total_price = $amt;
+                $data[$i] = $product;
+                $i++;
+                
+            }
+            $waiter = Waiter::where('id',$data[0]->waiter_id)->get();
+            $member = Member::where('id',$data[0]->member_id)->get();
+            
+           
+            return view('manager.billing',['orders'=>$data,'waiter'=>$waiter,'member'=>$member,'count'=>1]);
         }
-        else
-        {
+        else{
             return view('manager.billing',['result'=>"No data found"]);
         }
+        
+
+        // $clientSlug = Session::get('client-slug');
+        // if($slug != $clientSlug){
+        //     return view("error");
+        // }
+        // $order=Order::where('order_no',$orderid)->get();
+        // if($order->count()>0)
+        // {
+        //     $waiter=Waiter::where('id',$order[0]->waiter_id)->get();
+        //     $member=Member::where('id',$order[0]->member_id)->get();
+        //     return view('manager.billing',['orders'=>$order,'waiter'=>$waiter,'member'=>$member,'count'=>1]);
+        // }
+        // else
+        // {
+        //     return view('manager.billing',['result'=>"No data found"]);
+        // }
     }
 
     public function bookTable(Request $request)

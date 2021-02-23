@@ -150,7 +150,7 @@ Route::post('/{slug}/profile','ClientController@profileChangePassword');
 Route::get('/{slug}/manager/dashboard','ManagerController@home');
 Route::get('/{slug}/manager/order-take/{id}','ManagerController@orderTake');
 Route::get('/{slug}/manager/order-info/{orderid}','ManagerController@orderInfo');
-Route::get('/{slug}/manager/billing/{orderid}','ManagerController@billing');
+Route::get('/{slug}/manager/billing/{tableid}','ManagerController@billing');
 Route::get('/{slug}/manager/table-count','ManagerController@tableCount');
 Route::post('/{slug}/manager/book-table','ManagerController@bookTable');
 Route::post('/{slug}/manager/save-order/{id}','ManagerController@saveOrder');
